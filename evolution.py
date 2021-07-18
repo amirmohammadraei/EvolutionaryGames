@@ -1,6 +1,10 @@
+import random
+from copy import deepcopy
+import csv
 from player import Player
 import numpy as np
 from config import CONFIG
+import math
 
 
 class Evolution():
@@ -15,10 +19,13 @@ class Evolution():
 
     def mutate(self, child):
 
-        # TODO
-        # child: an object of class `Player`
-        pass
+        child.nn.w1 += np.random.normal(0, 1, child.nn.w1.shape)
+        child.nn.w2 += np.random.normal(0, 1, child.nn.w2.shape)
 
+        child.nn.b1 += np.random.normal(0, 1, child.nn.b1.shape)
+        child.nn.b2 += np.random.normal(0, 1, child.nn.b2.shape)
+        
+        return child
 
     def generate_new_population(self, num_players, prev_players=None):
 
@@ -27,24 +34,25 @@ class Evolution():
             return [Player(self.mode) for _ in range(num_players)]
 
         else:
+            fitnesses = [i.fitness ^ 4 for i in prev_players]
+            chosen = random.choices(prev_players, weights=fitnesses, cum_weights=None, k=num_players)
+            babies = [self.mutate(deepcopy(i)) for i in chosen]
 
-            # TODO
-            # num_players example: 150
-            # prev_players: an array of `Player` objects
-
-            # TODO (additional): a selection method other than `fitness proportionate`
-            # TODO (additional): implementing crossover
-
-            new_players = prev_players
-            return new_players
+            return babies
 
     def next_population_selection(self, players, num_players):
+        players.sort(key=lambda x: x.fitness, reverse=True)
+        total_sum = 0
+        for player in players:
+            total_sum = total_sum + player.fitness
+        average = total_sum / len(players)
+        minimum = players[len(players) - 1].fitness
+        maximum = players[0].fitness
 
-        # TODO
-        # num_players example: 100
-        # players: an array of `Player` objects
 
-        # TODO (additional): a selection method other than `top-k`
-        # TODO (additional): plotting
+        with open('answer.csv', mode='a') as answer_file:
+            answer_writer = csv.writer(answer_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            answer_writer.writerow([minimum, maximum, average])
+        answer_file.close()
 
         return players[: num_players]
