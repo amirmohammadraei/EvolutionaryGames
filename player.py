@@ -1,6 +1,6 @@
 import pygame
 import numpy as np
-
+import math
 from nn import NeuralNetwork
 from config import CONFIG
 
@@ -97,16 +97,39 @@ class Player():
             layer_sizes = [6, 20, 1]
         return layer_sizes
 
-    
     def think(self, mode, box_lists, agent_position, velocity):
 
-        # TODO
-        # mode example: 'helicopter'
-        # box_lists: an array of `BoxList` objects
-        # agent_position example: [600, 250]
-        # velocity example: 7
+        i = 0
+        while mode == 'helicopter':
+            if len(box_lists):
+                if box_lists[i].x > agent_position[0]:
+                    x0 = agent_position[0] - box_lists[i].x
+                    y0 = agent_position[1] - box_lists[i].gap_mid
+                    if len(box_lists) > 1:
+                        x1 = agent_position[0] - box_lists[i + 1].x
+                        y1 = agent_position[1] - box_lists[i + 1].gap_mid
+                    else:
+                        x1 = box_lists[i].x + 200
+                        y1 = y0
+                    break
+                else:
+                    i += 1
+            else:
+                x0 = x1 = 1280
+                y0 = y1 = 360
+                break
+        z1 = math.sqrt((x0 ** 2) + (y0 ** 2))
 
-        direction = -1
+        nn_input = [[velocity / 10], [z1 / 1468.6],  [x0 / 1280],
+                    [y0 / 720], [x1 / 1280], [y1 / 720]]
+
+
+        output = self.nn.forward(nn_input)[0]
+
+        if output[0] > 0.3:
+            direction = 1
+        else:
+            direction = -1
         return direction
 
     def collision_detection(self, mode, box_lists, camera):
