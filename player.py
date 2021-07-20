@@ -99,38 +99,30 @@ class Player():
 
     def think(self, mode, box_lists, agent_position, velocity):
 
-        i = 0
+        box_counter = 0
         while mode == 'helicopter':
             if len(box_lists):
-                if box_lists[i].x > agent_position[0]:
-                    x0 = agent_position[0] - box_lists[i].x
-                    y0 = agent_position[1] - box_lists[i].gap_mid
+                if box_lists[box_counter].x > agent_position[0]:
+                    x0 = agent_position[0] - box_lists[box_counter].x
+                    y0 = agent_position[1] - box_lists[box_counter].gap_mid
                     if len(box_lists) > 1:
-                        x1 = agent_position[0] - box_lists[i + 1].x
-                        y1 = agent_position[1] - box_lists[i + 1].gap_mid
+                        x1 = agent_position[0] - box_lists[box_counter + 1].x
+                        y1 = agent_position[1] - box_lists[box_counter + 1].gap_mid
                     else:
-                        x1 = box_lists[i].x + 200
+                        x1 = box_lists[box_counter].x + 200
                         y1 = y0
                     break
                 else:
-                    i += 1
+                    box_counter += 1
             else:
                 x0 = x1 = 1280
                 y0 = y1 = 360
                 break
-        z1 = math.sqrt((x0 ** 2) + (y0 ** 2))
+        # normalize kardan beine 0 o 1 kardan
+        pass_to_forward = [[velocity / 10], [math.sqrt((x0 ** 2) + (y0 ** 2)) / 1468.6],  [x0 / 1280], [y0 / 720], [x1 / 1280], [y1 / 720]]
+        output = self.nn.forward(pass_to_forward)[0] # train kardan
+        return 1 if output[0] > 0.5 else -1
 
-        nn_input = [[velocity / 10], [z1 / 1468.6],  [x0 / 1280],
-                    [y0 / 720], [x1 / 1280], [y1 / 720]]
-
-
-        output = self.nn.forward(nn_input)[0]
-
-        if output[0] > 0.3:
-            direction = 1
-        else:
-            direction = -1
-        return direction
 
     def collision_detection(self, mode, box_lists, camera):
         if mode == 'helicopter':
