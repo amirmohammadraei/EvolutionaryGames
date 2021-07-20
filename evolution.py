@@ -22,8 +22,8 @@ class Evolution():
         child.nn.w1 += np.random.normal(0, 1, child.nn.w1.shape)
         child.nn.w2 += np.random.normal(0, 1, child.nn.w2.shape)
 
-        child.nn.b1 += np.random.normal(0, 1, child.nn.b1.shape)
-        child.nn.b2 += np.random.normal(0, 1, child.nn.b2.shape)
+        child.nn.b1 += np.random.normal(0, 0.8, child.nn.b1.shape)
+        child.nn.b2 += np.random.normal(0, 0.8, child.nn.b2.shape)
         
         return child
 
@@ -34,20 +34,21 @@ class Evolution():
             return [Player(self.mode) for _ in range(num_players)]
 
         else:
-            fitnesses = [i.fitness ^ 4 for i in prev_players]
-            chosen = random.choices(prev_players, weights=fitnesses, cum_weights=None, k=num_players)
-            babies = [self.mutate(deepcopy(i)) for i in chosen]
+            fitnesses = [i.fitness for i in prev_players]
+            chosen = random.choices(prev_players, weights=fitnesses, cum_weights=None, k=num_players) # motanesb ba shayestegi
+            childs = [self.mutate(deepcopy(i)) for i in chosen]
 
-            return babies
+            return childs
 
     def next_population_selection(self, players, num_players):
+
         players.sort(key=lambda x: x.fitness, reverse=True)
+
         total_sum = 0
-        for player in players:
-            total_sum = total_sum + player.fitness
-        average = total_sum / len(players)
-        minimum = players[len(players) - 1].fitness
+        for player in players: total_sum = total_sum + player.fitness
         maximum = players[0].fitness
+        minimum = players[len(players) - 1].fitness
+        average = total_sum / len(players)
 
 
         with open('answer.csv', mode='a') as answer_file:
