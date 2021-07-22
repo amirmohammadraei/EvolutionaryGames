@@ -100,7 +100,7 @@ class Player():
     def think(self, mode, box_lists, agent_position, velocity):
 
         box_counter = 0
-        while mode == 'helicopter':
+        while mode == 'helicopter' or mode == 'gravity:
             if len(box_lists):
                 if box_lists[box_counter].x > agent_position[0]:
                     x0 = agent_position[0] - box_lists[box_counter].x
